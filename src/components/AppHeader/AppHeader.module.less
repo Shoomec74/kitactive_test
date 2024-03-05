@@ -1,0 +1,36 @@
+
+@primary-color: #4a90e2; // Пример переменной для основного цвета
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .logo {
+    background-image: url('@images/logo.png');
+    background-size: contain;
+    max-width: 100px;
+    max-height: 100px;
+  }
+
+  .button {
+    padding: 10px 20px;
+    background-color: @primary-color;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken(@primary-color, 10%);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px lighten(@primary-color, 40%);
+    }
+  }
+}

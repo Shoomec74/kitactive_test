@@ -1,0 +1,31 @@
+{
+  "name": "kitactive_test",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.24.0",
+    "@reduxjs/toolkit": "^2.2.1",
+    "@ya.praktikum/react-developer-burger-ui-components": "^1.14.0",
+    "install": "^0.13.0",
+    "less": "^4.2.0",
+    "npm": "^10.5.0",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^9.1.0",
+    "react-router-dom": "^6.22.2"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^0.4.7",
+    "@rsbuild/plugin-react": "^0.4.7",
+    "@types/react": "^18.2.47",
+    "@types/react-dom": "^18.2.18",
+    "@types/redux": "^3.6.0",
+    "typescript": "^5.3.0"
+  }
+}
