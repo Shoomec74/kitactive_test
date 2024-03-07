@@ -3,75 +3,77 @@ import { FileRejection, useDropzone } from 'react-dropzone';
 import styles from './DropZone.module.less';
 
 function MyDropzone() {
-  const [progress, setProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
+  //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
   const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
   const [rejectedFiles, setRejectedFiles] = useState<FileRejection[]>([]);
-  const { thumbsContainer, thumb, thumbInner, img } = styles;
 
-  // Функция для симуляции загрузки
-  const simulateUpload = (file: File) => {
-    const fileSize = file.size;
-    let uploaded = 0;
-    setUploading(true);
+  //-- Если когда-то понадобится сохранять большие файлы то можно отображать процесс загрузкт сначала в память браузера --//
+  const [filesProcessed, setFilesProcessed] = useState(0);
+  const [totalFiles, setTotalFiles] = useState(0);
 
-    const interval = setInterval(() => {
-      // Увеличиваем 'uploaded' и обновляем прогресс
-      uploaded += fileSize / 20; // Симулируем скорость загрузки
-      const progress = Math.min(100, (uploaded / fileSize) * 100);
-      setProgress(progress);
+  //-- Ссылки на стили для элементов предварительного просмотра --//
+  const { thumbsContainer, thumb, thumbInner, img, progressBar } = styles;
 
-      if (uploaded >= fileSize) {
-        clearInterval(interval);
-        setUploading(false);
-        setProgress(0); // Сброс прогресса после загрузки
-      }
-    }, 100);
-  };
-
+  //-- Функция fileSize валидирует размер файла, возвращая ошибку, если файл превышает 1МБ --//
   const fileSize = (file: File) => {
     if (file.size > 1024 * 1024) {
-      // Пример ограничения размера файла 1МБ
+      //-- Проверка, что размер файла больше 1МБ --//
       return {
         code: 'too-large',
         message: `Размер файла превышает 1МБ`,
       };
     }
-    return null;
+    return null; //-- Возвращение null, если размер файла не превышает лимит --//
   };
 
+  //-- Функция onDrop обрабатывает событие перетаскивания файлов в зону загрузки, обновляя состояния принятых и отклоненных файлов --//
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      if (acceptedFiles?.length) {
-        setAcceptedFiles((previousFiles: File[]) => [
-          ...previousFiles,
-          ...acceptedFiles.map((file: File) =>
-            Object.assign(file, { preview: URL.createObjectURL(file) })
-          ),
+    async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      // Установка общего количества файлов
+      setTotalFiles(acceptedFiles.length);
+
+      // Асинхронно обрабатываем каждый принятый файл с задержкой
+      for (const file of acceptedFiles) {
+        // Задержка перед обработкой каждого файла
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Задержка в 1 секунду
+
+        // Создание URL для предпросмотра и обновление состояния принятых файлов
+        setAcceptedFiles((prevFiles) => [
+          ...prevFiles,
+          Object.assign(file, { preview: URL.createObjectURL(file) }),
         ]);
+
+        // Увеличиваем счетчик обработанных файлов после каждой задержки
+        setFilesProcessed((prevCount) => prevCount + 1);
       }
 
-      if (rejectedFiles?.length) {
-        setRejectedFiles((previousFiles: FileRejection[]) => [
-          ...previousFiles,
-          ...rejectedFiles,
-        ]);
-      }
+      // Обновление списка отклоненных файлов
+      setRejectedFiles((previousFiles: FileRejection[]) => [
+        ...previousFiles,
+        ...rejectedFiles,
+      ]);
+
+      //-- Обновляем счетчики загрузки --//
+      setFilesProcessed(0);
+      setTotalFiles(0);
     },
     []
   );
 
+  //-- Использование useDropzone для интеграции функционала drag-n-drop с кастомной логикой валидации и обработки файлов --//
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     validator: fileSize,
   });
 
+  //-- Создание элементов списка для принятых файлов --//
   const acceptedFileItems = acceptedFiles.map((file: File) => (
     <li key={file.path}>
       {file.path} - {file.size} bytes
     </li>
   ));
 
+  //-- Создание элементов списка для отклоненных файлов с детализацией ошибок --//
   const fileRejectionItems = rejectedFiles.map(({ file, errors }) => (
     <li key={file.path}>
       {file.path} - {file.size} bytes
@@ -83,23 +85,25 @@ function MyDropzone() {
     </li>
   ));
 
+  //-- Функция для удаления всех выбранных файлов --//
   const removeAll = () => {
     acceptedFiles.map((file) =>
       console.log(`acceptedFiles - ${JSON.stringify(file)}`)
     );
     rejectedFiles.map((file) => console.log(`rejectedFiles - ${file}`));
-    setAcceptedFiles([]);
-    setRejectedFiles([]);
+    setAcceptedFiles([]); //-- Сброс списка принятых файлов --//
+    setRejectedFiles([]); //-- Сброс списка отклоненных файлов --//
   };
 
+  //-- Генерация предпросмотров для принятых файлов --//
   const previews = acceptedFiles.map((file: File) => (
     <div className={thumb} key={file.name}>
       <div className={thumbInner}>
         <img
-          src={file.preview}
+          src={file.preview} //-- Использование URL для предпросмотра файла --//
           className={img}
           onLoad={() => {
-            URL.revokeObjectURL(file.preview);
+            URL.revokeObjectURL(file.preview); //-- Освобождение URL после загрузки изображения для экономии памяти --//
           }}
         />
       </div>
@@ -110,10 +114,10 @@ function MyDropzone() {
     <>
       <div {...getRootProps()} className={styles.dndZone}>
         <input {...getInputProps()} />
-        {uploading ? (
+        {totalFiles > 0 ? (
           <div>
             <p>Загрузка...</p>
-            <progress value={progress} max="100" />
+            <progress className={progressBar} value={filesProcessed} max={totalFiles}></progress>
           </div>
         ) : (
           <>

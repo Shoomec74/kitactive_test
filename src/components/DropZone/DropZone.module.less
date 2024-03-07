@@ -27,8 +27,47 @@
 }
 
 .img {
-    display: block;
-    width  : auto;
-    height : 100%;
+    display      : block;
+    width        : auto;
+    height       : 100%;
     border-radius: 50%;
+}
+
+.progressBar {
+    position          : absolute;
+    top               : 0;
+    left              : 0;
+    padding           : 0;
+    width             : 100%;
+    height            : 4px;
+    //border  : none;
+    /* Установка основных свойств прогресс бара */
+    -webkit-appearance: none;
+    -moz-appearance   : none;
+    appearance        : none;
+
+    /* Стилизация для Chrome, Safari, новых версий Opera */
+    &::-webkit-progress-bar {
+        background-color: #eee;
+        /* Цвет фона */
+    }
+
+    &::-webkit-progress-value {
+        background-color: yellow;
+        /* Цвет заполнения */
+    }
+
+    /* Стилизация для Firefox */
+    &::-moz-progress-bar {
+        background-color: yellow;
+        /* Цвет заполнения */
+    }
+
+    /* Для IE10+ */
+    &::-ms-fill {
+        background-color: yellow;
+        /* Цвет заполнения */
+        border          : none;
+        /* Убираем границу */
+    }
 }
