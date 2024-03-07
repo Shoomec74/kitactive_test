@@ -44,9 +44,9 @@ export const signIn = createAsyncThunk(
 
 export const signOut = createAsyncThunk(
   '/api/logout',
-  async (token: string, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      await logoutApi(token);
+      await logoutApi();
       deleteCookie('token');
       return;
     } catch (error) {

@@ -13,8 +13,8 @@ function signinApi(userInfo: TUserSigninData) {
 }
 
 // Запрос на выход из аккаунта
-function logoutApi(token: string) {
-  return postReq<TSignoutResponse>({ uri: 'api/logout', data: token });
+function logoutApi() {
+  return postReq<TSignoutResponse>({ uri: 'api/logout', auth: true});
 }
 
 export { signupApi, signinApi, logoutApi };
@@ -54,7 +54,7 @@ function setCookie(name: string, value: string, props?: any): void {
   document.cookie = updatedCookie;
 }
 
-function deleteCookie(name: string): void {
+async function deleteCookie(name: string): Promise<void> {
   setCookie(name, '', { expires: -1 });
 }
 
