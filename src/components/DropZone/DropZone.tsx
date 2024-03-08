@@ -1,18 +1,31 @@
 import React, { useCallback, useState } from 'react';
 import { FileRejection, useDropzone } from 'react-dropzone';
 import styles from './DropZone.module.less';
+import { useAppDispatch, useAppSelector } from '../../services/hooks/hooks';
+import {
+  setPreviewAcceptedFiles,
+  setPreviewRejectedFiles,
+} from '../../services/reducers/previewFiles.slice';
 
-function MyDropzone() {
+const MAX_SIZE = 1024 * 1024; // Максимальный размер файлов в байтах (1MB)
+const MAX_FILES = 20; // Максимальное количество файлов
+
+function DropZone() {
   //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
-  const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
-  const [rejectedFiles, setRejectedFiles] = useState<FileRejection[]>([]);
+  const { acceptedFiles, rejectedFiles } = useAppSelector((state) => ({
+    acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
+    rejectedFiles: state.previewFiles.rejectedFiles,
+    //loadingFiles: state.previewFiles.loadingFiles,
+  }));
 
   //-- Если когда-то понадобится сохранять большие файлы то можно отображать процесс загрузкт сначала в память браузера --//
   const [filesProcessed, setFilesProcessed] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
 
+  const dispatch = useAppDispatch();
+
   //-- Ссылки на стили для элементов предварительного просмотра --//
-  const { thumbsContainer, thumb, thumbInner, img, progressBar } = styles;
+  const { dndZone, progressBar, progressFiller, component } = styles;
 
   //-- Функция fileSize валидирует размер файла, возвращая ошибку, если файл превышает 1МБ --//
   const fileSize = (file: File) => {
@@ -29,31 +42,44 @@ function MyDropzone() {
   //-- Функция onDrop обрабатывает событие перетаскивания файлов в зону загрузки, обновляя состояния принятых и отклоненных файлов --//
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      // Установка общего количества файлов
       setTotalFiles(acceptedFiles.length);
 
-      // Асинхронно обрабатываем каждый принятый файл с задержкой
+      let totalLoadedFiles = 18;
+      let totalLoadedSize = 0;
+      const newRejected = [];
+
       for (const file of acceptedFiles) {
-        // Задержка перед обработкой каждого файла
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Задержка в 1 секунду
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Имитация задержки
 
-        // Создание URL для предпросмотра и обновление состояния принятых файлов
-        setAcceptedFiles((prevFiles) => [
-          ...prevFiles,
-          Object.assign(file, { preview: URL.createObjectURL(file) }),
-        ]);
+        const fileData = {
+          preview: URL.createObjectURL(file),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified,
+        };
 
-        // Увеличиваем счетчик обработанных файлов после каждой задержки
+        if (
+          totalLoadedFiles < MAX_FILES &&
+          totalLoadedSize + file.size <= MAX_SIZE
+        ) {
+          // Если не превышены лимиты по количеству и размеру, принимаем файл
+          dispatch(setPreviewAcceptedFiles(fileData));
+          totalLoadedSize += file.size;
+          totalLoadedFiles++;
+        } else {
+          // Иначе, файл попадает в массив отклонённых
+          const message = `Превышен лимит в ${MAX_FILES} файлов или общий размер файлов превышает 1mb`;
+          newRejected.push({
+            file,
+            errors: [{ code: 'limit-exceeded', message }],
+          });
+        }
+
         setFilesProcessed((prevCount) => prevCount + 1);
       }
 
-      // Обновление списка отклоненных файлов
-      setRejectedFiles((previousFiles: FileRejection[]) => [
-        ...previousFiles,
-        ...rejectedFiles,
-      ]);
-
-      //-- Обновляем счетчики загрузки --//
+      dispatch(setPreviewRejectedFiles([...rejectedFiles, ...newRejected]));
       setFilesProcessed(0);
       setTotalFiles(0);
     },
@@ -66,58 +92,19 @@ function MyDropzone() {
     validator: fileSize,
   });
 
-  //-- Создание элементов списка для принятых файлов --//
-  const acceptedFileItems = acceptedFiles.map((file: File) => (
-    <li key={file.path}>
-      {file.path} - {file.size} bytes
-    </li>
-  ));
-
-  //-- Создание элементов списка для отклоненных файлов с детализацией ошибок --//
-  const fileRejectionItems = rejectedFiles.map(({ file, errors }) => (
-    <li key={file.path}>
-      {file.path} - {file.size} bytes
-      <ul>
-        {errors.map((e) => (
-          <li key={e.code}>{e.message}</li>
-        ))}
-      </ul>
-    </li>
-  ));
-
-  //-- Функция для удаления всех выбранных файлов --//
-  const removeAll = () => {
-    acceptedFiles.map((file) =>
-      console.log(`acceptedFiles - ${JSON.stringify(file)}`)
-    );
-    rejectedFiles.map((file) => console.log(`rejectedFiles - ${file}`));
-    setAcceptedFiles([]); //-- Сброс списка принятых файлов --//
-    setRejectedFiles([]); //-- Сброс списка отклоненных файлов --//
-  };
-
-  //-- Генерация предпросмотров для принятых файлов --//
-  const previews = acceptedFiles.map((file: File) => (
-    <div className={thumb} key={file.name}>
-      <div className={thumbInner}>
-        <img
-          src={file.preview} //-- Использование URL для предпросмотра файла --//
-          className={img}
-          onLoad={() => {
-            URL.revokeObjectURL(file.preview); //-- Освобождение URL после загрузки изображения для экономии памяти --//
-          }}
-        />
-      </div>
-    </div>
-  ));
-
   return (
     <>
-      <div {...getRootProps()} className={styles.dndZone}>
+      <div {...getRootProps({ className: dndZone })}>
         <input {...getInputProps()} />
         {totalFiles > 0 ? (
           <div>
             <p>Загрузка...</p>
-            <progress className={progressBar} value={filesProcessed} max={totalFiles}></progress>
+            <div className={progressBar}>
+              <div
+                className={progressFiller}
+                style={{ width: `${(filesProcessed / totalFiles) * 100}%` }}
+              ></div>
+            </div>
           </div>
         ) : (
           <>
@@ -125,28 +112,19 @@ function MyDropzone() {
               Перетащите файлы сюда или кликните, чтобы выбрать файлы для
               загрузки.
             </p>
-            <em>
-              (Only files with name less than 20 characters will be accepted)
-            </em>
+            {acceptedFiles.length ? (
+              <p>
+                Вы загрузили - {acceptedFiles.length} файлов, осталось{' '}
+                {20 - acceptedFiles.length}
+              </p>
+            ) : (
+              <p>Максимум 20 файлов</p>
+            )}
           </>
         )}
       </div>
-
-      <div>
-        <h2>Preview</h2>
-        <button type="button" onClick={removeAll}>
-          Remove all files
-        </button>
-      </div>
-      <aside>
-        <h4>Accepted files</h4>
-        <ul>{acceptedFileItems}</ul>
-        <h4>Rejected files</h4>
-        <ul>{fileRejectionItems}</ul>
-        <aside className={thumbsContainer}>{previews}</aside>
-      </aside>
     </>
   );
 }
 
-export default MyDropzone;
+export default DropZone;

@@ -8,29 +8,59 @@ import {
 import { useAppDispatch, useAppSelector } from '../../services/hooks/hooks';
 import { signOut } from '../../services/reducers/authorization.slice';
 import { getCookie } from '../../auth/auth';
+import DropZone from '../DropZone/DropZone';
+import { removePreviewFiles } from '../../services/reducers/previewFiles.slice';
 
 const AppHeader: FC = () => {
   const dispatch = useAppDispatch();
   const token = getCookie('token');
 
   const onButtonClick = () => {
-    console.log(token);
     if (token) {
       dispatch(signOut());
     }
   };
 
-  const { user, isLoading } = useAppSelector((state) => ({
-    user: state.auth.user, // Обновили путь к состоянию
-    isLoading: state.auth.isLoading,
-  }));
+  //-- Функция для удаления всех выбранных файлов --//
+  const removeButtonClick = () => {
+    dispatch(removePreviewFiles());
+  };
 
-  const { name, email } = user;
+  const handlerSubmitButton = () => {};
+
+  const { user, isLoading, acceptedFiles, rejectedFiles } = useAppSelector(
+    (state) => ({
+      user: state.auth.user, // Обновили путь к состоянию
+      isLoading: state.auth.isLoading,
+      acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
+      rejectedFiles: state.previewFiles.rejectedFiles,
+    })
+  );
 
   return (
     <header className={styles.header}>
       <div className={styles.logo}></div>
-      <p>{email}</p>
+
+      <DropZone />
+      <Button
+        type="primary"
+        size="small"
+        disabled={!acceptedFiles.length && !rejectedFiles.length}
+        onClick={removeButtonClick}
+        htmlType="button"
+      >
+        Удалить все превью файлов
+      </Button>
+
+      <Button
+        type="primary"
+        size="small"
+        disabled={isLoading || !acceptedFiles.length}
+        onClick={handlerSubmitButton}
+        htmlType="submit"
+      >
+        {isLoading ? 'Подождите' : 'Загрузить файлы на сервер'}
+      </Button>
 
       <Button
         type="primary"

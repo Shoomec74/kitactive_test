@@ -12,14 +12,14 @@ import { useEffect, useState } from 'react';
 
 const App = () => {
   // const path = useLocation().pathname;
-  const { body } = styles;
+  const { app } = styles;
 
   const dispatch = useDispatch();
   const cookie = getCookie('token');
   const [token, setToket] = useState<string | undefined>('');
 
   return (
-    <>
+    <div className={app}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -35,7 +35,7 @@ const App = () => {
           }
         />
       </Routes>
-    </>
+    </div>
   );
 };
 

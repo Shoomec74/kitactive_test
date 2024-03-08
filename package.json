@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "rsbuild dev --open",
     "build": "rsbuild build",
-    "wprevie": "rsbuild preview"
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "@babel/runtime": "^7.24.0",
-    "@heroicons/react": "^2.1.1",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.12",
+    "@mui/material": "^5.15.12",
     "@reduxjs/toolkit": "^2.2.1",
     "@ya.praktikum/react-developer-burger-ui-components": "^1.14.0",
     "install": "^0.13.0",
