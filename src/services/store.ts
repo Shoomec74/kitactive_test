@@ -1,10 +1,12 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import authorizationReducer from './reducers/authorization.slice';
 import previewFilesReducer from './reducers/previewFiles.slice';
+import attachmentsReduser from './reducers/attachments.slice';
 
 const rootReducer = combineReducers({
   auth: authorizationReducer,
   previewFiles: previewFilesReducer,
+  attachments: attachmentsReduser,
 });
 
 export const setupStore = () => {

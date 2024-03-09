@@ -10,10 +10,20 @@ import { signOut } from '../../services/reducers/authorization.slice';
 import { getCookie } from '../../auth/auth';
 import DropZone from '../DropZone/DropZone';
 import { removePreviewFiles } from '../../services/reducers/previewFiles.slice';
+import { uploadFiles } from '../../services/reducers/attachments.slice';
 
 const AppHeader: FC = () => {
   const dispatch = useAppDispatch();
   const token = getCookie('token');
+
+  const { user, isLoading, acceptedFiles, rejectedFiles } = useAppSelector(
+    (state) => ({
+      user: state.auth.user, // Обновили путь к состоянию
+      isLoading: state.auth.isLoading,
+      acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
+      rejectedFiles: state.previewFiles.rejectedFiles,
+    })
+  );
 
   const onButtonClick = () => {
     if (token) {
@@ -26,16 +36,9 @@ const AppHeader: FC = () => {
     dispatch(removePreviewFiles());
   };
 
-  const handlerSubmitButton = () => {};
-
-  const { user, isLoading, acceptedFiles, rejectedFiles } = useAppSelector(
-    (state) => ({
-      user: state.auth.user, // Обновили путь к состоянию
-      isLoading: state.auth.isLoading,
-      acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
-      rejectedFiles: state.previewFiles.rejectedFiles,
-    })
-  );
+  const handlerSubmitButton = () => {
+    dispatch(uploadFiles(acceptedFiles))
+  };
 
   return (
     <header className={styles.header}>
@@ -57,7 +60,7 @@ const AppHeader: FC = () => {
         size="small"
         disabled={isLoading || !acceptedFiles.length}
         onClick={handlerSubmitButton}
-        htmlType="submit"
+        htmlType="button"
       >
         {isLoading ? 'Подождите' : 'Загрузить файлы на сервер'}
       </Button>

@@ -1,22 +1,15 @@
-// import { FC } from 'react';
 import { Route, Routes, useLocation, useParams } from 'react-router-dom';
 import styles from './App.module.less';
 import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
 import { Login } from '../../pages/login/Login';
 import { Page404 } from '../../pages/page404/Page404';
-import { useDispatch } from 'react-redux';
-import { getCookie } from '../../auth/auth';
+
 import AdminPanel from '../../pages/adminPanel/AdminPanel';
 import { Register } from '../../pages/register/Register';
-import { useEffect, useState } from 'react';
+import { FC } from 'react';
 
-const App = () => {
-  // const path = useLocation().pathname;
+const App: FC = () => {
   const { app } = styles;
-
-  const dispatch = useDispatch();
-  const cookie = getCookie('token');
-  const [token, setToket] = useState<string | undefined>('');
 
   return (
     <div className={app}>

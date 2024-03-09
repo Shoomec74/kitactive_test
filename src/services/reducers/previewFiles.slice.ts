@@ -1,16 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { FileRejection } from 'react-dropzone';
 
-export interface IFiles {
-  preview: string;
-  name: string;
-  size: number;
-  type: string;
-  lastModified: number;
-}
-
 type TFilesState = {
-  acceptedFiles: IFiles[];
+  acceptedFiles: File[];
   rejectedFiles: FileRejection[];
 };
 
@@ -25,7 +17,7 @@ export const previewFilesSlice = createSlice({
   reducers: {
     setPreviewAcceptedFiles: (
       state,
-      action: PayloadAction<IFiles>
+      action: PayloadAction<File>
     ) => {
       state.acceptedFiles.push(action.payload);
     },
@@ -37,7 +29,7 @@ export const previewFilesSlice = createSlice({
     },
     removePreviewFiles: (state) => {
       // При удалении файлов необходимо также освободить URL-адреса созданные для предпросмотра
-      state.acceptedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
+      //state.acceptedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
       state.acceptedFiles = [];
       state.rejectedFiles = [];
     },

@@ -10,24 +10,25 @@ interface IResponse<T> extends Response {
 type TOptions = {
   headers?: { authorization?: string; 'Content-Type': string };
   method?: string;
-  body?: string;
+  body?: string | FormData;
 };
 
 type TReq = {
   uri: string;
   auth?: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
+  attachments?: File[];
   id?: string;
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
 };
 
 const BASE_PARAMS = {
   headers: {
-    'Content-Type': 'application/json;charset=utf-8',
+    'Content-Type': 'application/json',
   },
 };
 
-function getReqParams({ uri, id, method, data, auth }: TReq) {
+function getReqParams({ uri, id, method, data, attachments, auth }: TReq) {
   const params: TOptions = {
     ...BASE_PARAMS,
     method,
@@ -36,7 +37,26 @@ function getReqParams({ uri, id, method, data, auth }: TReq) {
   if (auth) {
     params.headers!.authorization = `Bearer ${getCookie('token') || ''}`;
   }
+
+  if (attachments) {
+    const formData = new FormData();
+    
+    attachments.forEach((file: File) => {
+      formData.append(`files[]`, file);
+    });
+
+    // Не используйте JSON.stringify здесь, напрямую присвойте formData в body
+    params.body = formData;
+    // Удаляем 'Content-Type': 'application/json' для этого запроса чтобы браузер установил Blob сам
+    //@ts-ignore
+    delete params.headers['Content-Type'];
+  }
+
   if (data) {
+    params.headers = {
+      ...params.headers,
+      'Content-Type': 'application/json',
+    };
     params.body = JSON.stringify(data);
   }
   return { path, params };

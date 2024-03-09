@@ -8,29 +8,15 @@
     align-items: center;
 }
 
-.titleWrapper {
-    display        : flex;
-    justify-content: space-around;
-    margin         : 20px 0;
-}
-
-.sectionWrapper {
-    display: flex;
-}
-
-.sectionTitle {
-    .fontMixin(bold)
-}
-
 .content {
-    display       : flex;
-    flex-direction: column;
-    width         : 100%;
+    display: flex;
+    width  : 100%;
 }
 
 .filename {
     flex-grow: 1;
     margin   : 0 20px;
+    .fontMixin()
 }
 
 .removeButton {
@@ -42,7 +28,7 @@
 .allowFiles {
     display        : flex;
     width          : 640px;
-    height         : 600px;
+    height     : 600px;
     overflow-y     : auto;
     flex-direction : column;
     padding-top    : 20px;
@@ -55,7 +41,7 @@
 .rejectFiles {
     display       : flex;
     width         : 640px;
-    height        : 600px;
+    height    : 600px;
     flex-direction: column;
     padding-top   : 20px;
 }

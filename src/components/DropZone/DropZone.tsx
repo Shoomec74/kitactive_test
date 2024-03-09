@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FileRejection, useDropzone } from 'react-dropzone';
 import styles from './DropZone.module.less';
 import { useAppDispatch, useAppSelector } from '../../services/hooks/hooks';
@@ -10,13 +10,9 @@ import {
 const MAX_SIZE = 1024 * 1024; // Максимальный размер файлов в байтах (1MB)
 const MAX_FILES = 20; // Максимальное количество файлов
 
-function DropZone() {
-  //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
-  const { acceptedFiles, rejectedFiles } = useAppSelector((state) => ({
-    acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
-    rejectedFiles: state.previewFiles.rejectedFiles,
-    //loadingFiles: state.previewFiles.loadingFiles,
-  }));
+const DropZone: FC = () => {
+  //-- Ссылки на стили для элементов предварительного просмотра --//
+  const { dndZone, progressBar, progressFiller, dndZoneText } = styles;
 
   //-- Если когда-то понадобится сохранять большие файлы то можно отображать процесс загрузкт сначала в память браузера --//
   const [filesProcessed, setFilesProcessed] = useState(0);
@@ -24,8 +20,20 @@ function DropZone() {
 
   const dispatch = useAppDispatch();
 
-  //-- Ссылки на стили для элементов предварительного просмотра --//
-  const { dndZone, progressBar, progressFiller, component } = styles;
+  //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
+  const { acceptedFiles, files } = useAppSelector((state) => ({
+    acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
+    rejectedFiles: state.previewFiles.rejectedFiles,
+    files: state.attachments.files,
+  }));
+
+  const totalLoadedFiles = useMemo(() => {
+    return files.length;
+  }, [files]);
+
+  const allowLoadedFiles = useMemo(() => {
+    return MAX_FILES - (files.length + acceptedFiles.length);
+  }, [files, acceptedFiles]);
 
   //-- Функция fileSize валидирует размер файла, возвращая ошибку, если файл превышает 1МБ --//
   const fileSize = (file: File) => {
@@ -42,10 +50,9 @@ function DropZone() {
   //-- Функция onDrop обрабатывает событие перетаскивания файлов в зону загрузки, обновляя состояния принятых и отклоненных файлов --//
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      let totalLoadedSize = 0;
       setTotalFiles(acceptedFiles.length);
 
-      let totalLoadedFiles = 18;
-      let totalLoadedSize = 0;
       const newRejected = [];
 
       for (const file of acceptedFiles) {
@@ -60,13 +67,14 @@ function DropZone() {
         };
 
         if (
-          totalLoadedFiles < MAX_FILES &&
+          totalLoadedFiles <= MAX_FILES &&
           totalLoadedSize + file.size <= MAX_SIZE
         ) {
+          // @ts-ignore
+          file.preview = URL.createObjectURL(file);
           // Если не превышены лимиты по количеству и размеру, принимаем файл
-          dispatch(setPreviewAcceptedFiles(fileData));
+          dispatch(setPreviewAcceptedFiles(file));
           totalLoadedSize += file.size;
-          totalLoadedFiles++;
         } else {
           // Иначе, файл попадает в массив отклонённых
           const message = `Превышен лимит в ${MAX_FILES} файлов или общий размер файлов превышает 1mb`;
@@ -98,7 +106,7 @@ function DropZone() {
         <input {...getInputProps()} />
         {totalFiles > 0 ? (
           <div>
-            <p>Загрузка...</p>
+            <p className={dndZoneText}>Загрузка...</p>
             <div className={progressBar}>
               <div
                 className={progressFiller}
@@ -108,23 +116,23 @@ function DropZone() {
           </div>
         ) : (
           <>
-            <p>
+            <p className={dndZoneText}>
               Перетащите файлы сюда или кликните, чтобы выбрать файлы для
               загрузки.
             </p>
-            {acceptedFiles.length ? (
-              <p>
-                Вы загрузили - {acceptedFiles.length} файлов, осталось{' '}
-                {20 - acceptedFiles.length}
+            {acceptedFiles.length || totalLoadedFiles > 0 ? (
+              <p className={dndZoneText}>
+                Вы загрузили - {acceptedFiles.length + totalLoadedFiles} файлов,
+                осталось {allowLoadedFiles}
               </p>
             ) : (
-              <p>Максимум 20 файлов</p>
+              <p className={dndZoneText}>Максимум 20 файлов</p>
             )}
           </>
         )}
       </div>
     </>
   );
-}
+};
 
 export default DropZone;
