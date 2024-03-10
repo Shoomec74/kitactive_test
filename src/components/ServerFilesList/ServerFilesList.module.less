@@ -1,74 +1,36 @@
 @import '../../index.less';
 
 .previewInfo {
-    display    : flex;
-    margin-top : 16px;
-    width      : 100%;
-    height     : 100px;
-    align-items: center;
-}
-
-.content {
-    display: flex;
-    width  : 100%;
-}
-
-.filename {
-    flex-grow: 1;
-    margin   : 0 20px;
-    .fontMixin()
+  .flexLayout(none);
+  .widthHeightBlock(100%, 100px);
+  margin: 16px 0 0 0;
+  .manifestationAnimation()
 }
 
 .removeButton {
-    background: none;
-    border    : none;
-    cursor    : pointer;
+  background: none;
+  border    : none;
+  cursor    : pointer;
 }
 
-.allowFiles {
-    display        : flex;
-    width          : 640px;
-    height     : 600px;
-    overflow-y     : auto;
-    flex-direction : column;
-    padding-top    : 20px;
-    scrollbar-width: thin;
-    /* 'auto' или 'thin' */
-    scrollbar-color: grey transparent;
-    /* цвет скроллбара и цвет дорожки */
+.removeButtonDelete {
+  .flexLayout(none);
+  margin-top: 16px;
+  .widthHeightBlock(100%, 100px);
+  .fadeInAnimation()
 }
 
-.rejectFiles {
-    display       : flex;
-    width         : 640px;
-    height    : 600px;
-    flex-direction: column;
-    padding-top   : 20px;
+.filename {
+  flex-grow: 1;
+  margin   : 0 20px;
+  .fontMixin()
 }
 
 .img {
-    display        : block;
-    border-radius  : 50%;
-    object-fit     : cover;
-    object-position: center;
-    width          : 100px;
-    height         : 100px;
-}
-
-/* Стилизация скроллбара для WebKit-браузеров */
-.allowFiles::-webkit-scrollbar {
-    width: 3px;
-    /* Ширина скроллбара */
-}
-
-.allowFiles::-webkit-scrollbar-track {
-    background: transparent;
-    /* Цвет дорожки скроллбара */
-}
-
-.allowFiles::-webkit-scrollbar-thumb {
-    background-color: grey;
-    /* Цвет самого скроллбара */
-    border-radius   : 1px;
-    /* Скругление углов скроллбара */
+  display        : block;
+  border-radius  : 50%;
+  object-fit     : cover;
+  object-position: center;
+  width          : 100px;
+  height         : 100px;
 }

@@ -4,34 +4,39 @@ import { FileRejection } from 'react-dropzone';
 type TFilesState = {
   acceptedFiles: File[];
   rejectedFiles: FileRejection[];
+  previewFilesIsClear: boolean;
 };
 
 const initialState: TFilesState = {
   acceptedFiles: [],
   rejectedFiles: [],
+  previewFilesIsClear: true,
 };
 
 export const previewFilesSlice = createSlice({
   name: 'previewFiles',
   initialState: initialState,
   reducers: {
-    setPreviewAcceptedFiles: (
-      state,
-      action: PayloadAction<File>
-    ) => {
+    //-- Действие по добавлению состояния одобренных файлов для загрузки на сервер --//
+    setPreviewAcceptedFiles: (state, action: PayloadAction<File>) => {
       state.acceptedFiles.push(action.payload);
+      state.previewFilesIsClear = false;
     },
+
+    //-- Действие по добавлению состояния не одобренных файлов для отображения пользователю --//
     setPreviewRejectedFiles: (
       state,
-      action: PayloadAction<FileRejection[]>
+      action: PayloadAction<FileRejection[]>,
     ) => {
       state.rejectedFiles = [...state.rejectedFiles, ...action.payload];
+      state.previewFilesIsClear = false;
     },
+
+    //-- Действие по очистке состояния превью всех файлов --//
     removePreviewFiles: (state) => {
-      // При удалении файлов необходимо также освободить URL-адреса созданные для предпросмотра
-      //state.acceptedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
       state.acceptedFiles = [];
       state.rejectedFiles = [];
+      state.previewFilesIsClear = true;
     },
   },
 });

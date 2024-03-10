@@ -1,5 +1,5 @@
 import React, { FC, FormEvent } from 'react';
-import registerStyles from './register.module.css';
+import registerStyles from './register.module.less';
 import {
   Button,
   Input,
@@ -13,7 +13,9 @@ import { signUp } from '../../services/reducers/authorization.slice';
 
 export const Register: FC = () => {
   const { registerPage, form, link } = registerStyles;
+
   const dispatch = useAppDispatch();
+
   const location = useLocation();
 
   const { isLoading, isRegistered } = useAppSelector((state) => ({

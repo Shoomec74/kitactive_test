@@ -1,5 +1,3 @@
-import { string } from 'prop-types';
-
 export type TResponseLoadFile = {
   id: string;
   name: string;

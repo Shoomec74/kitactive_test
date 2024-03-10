@@ -4,12 +4,11 @@ import ArticleIcon from '@mui/icons-material/Article';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { FC } from 'react';
 
-// Определяем тип для аргументов функции
 interface IFileType {
   fileType: string;
 }
 
-// Функция возвращает иконку в зависимости от типа файла
+//-- Вспомогательный компонент возвращий иконку в зависмости от типа вложения --//
 export const getFileIcon: FC<IFileType> = ({
   fileType,
 }): JSX.Element | null => {

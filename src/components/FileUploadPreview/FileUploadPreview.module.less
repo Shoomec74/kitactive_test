@@ -1,43 +1,34 @@
 @import '../../index.less';
 
 .previewInfo {
-    display: flex;
-    margin-top: 16px;
-    width: 100%;
-    height: 100px;
-    align-items: center;
-    position: relative; /* Добавляем, чтобы псевдоэлементы позиционировались относительно этого контейнера */
-  }
-  
-  .crossedOut::after {
-    content: ''; /* Обязательное свойство для отображения псевдоэлемента */
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%; /* Ширина линии равна ширине контейнера */
-    background-color: transparent; /* Фон псевдоэлемента делаем прозрачным */
-    z-index: 1; /* Убедимся, что линия находится поверх контента контейнера */
-    /* Создаем красную линию */
-    border: solid @baseColor; /* Устанавливаем цвет и стиль границы */
-    border-width: 0 0 3px 0; /* Толщина границы: верх, право, низ, лево. Создаем линию внизу и слева */
-  }
+  .flexLayout(none, center);
+  .widthHeightBlock(100%, 100px);
+  margin  : 16px 0 0 0;
+  position: relative;
+  .manifestationAnimation();
+}
+
+.crossedOut::after {
+  content: '';
+  .absolutPosition(50%, 0);
+  width           : 100%;
+  background-color: transparent;
+  z-index         : 1;
+  border          : solid @crossOutContainerColor;
+  border-width    : 0 0 3px 0;
+}
+
 
 .img {
-    display        : block;
-    border-radius  : 50%;
-    object-fit     : cover;
-    object-position: center;
-    .baseBoxParametric()
+  display        : block;
+  border-radius  : 50%;
+  object-fit     : cover;
+  object-position: center;
+  .widthHeightBlock()
 }
 
 .filename {
-    flex-grow: 1;
-    margin   : 0 20px;
-    .fontMixin()
-}
-
-.removeButton {
-    background: none;
-    border    : none;
-    cursor    : pointer;
+  flex-grow: 1;
+  margin   : 0 20px;
+  .fontMixin()
 }

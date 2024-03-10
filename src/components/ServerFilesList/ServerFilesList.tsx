@@ -4,6 +4,8 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { getFileIcon } from '../../utils/utils';
 import { TResponseLoadFile } from '../../utils/types/attachments';
 import { getCookie } from '../../auth/auth';
+import { useAppDispatch } from '../../services/hooks/hooks';
+import { deleteFile } from '../../services/reducers/attachments.slice';
 
 interface IProps {
   file: TResponseLoadFile;
@@ -11,11 +13,18 @@ interface IProps {
 
 const ServerFilesList: FC<IProps> = ({ file }) => {
   const [previewUrl, setPreviewUrl] = useState<string>();
-  const { previewInfo, img, filename, removeButton } = styles;
+
+  const { previewInfo, img, filename, removeButton, removeButtonDelete } =
+    styles;
+
+  const dispatch = useAppDispatch();
+
+  const [isDelete, setIsDelete] = useState<boolean>(false);
 
   // Функция для удаления файла
-  const handleRemoveFile = () => {
-    console.log(`Удаление файла с ID: ${file.id}`);
+  const handleRemoveFile = (id: string) => {
+    dispatch(deleteFile(id));
+    setIsDelete(true);
   };
 
   const cookie = getCookie('token');
@@ -58,11 +67,15 @@ const ServerFilesList: FC<IProps> = ({ file }) => {
   };
 
   return (
-    <li className={previewInfo}>
+    <li className={!isDelete ? previewInfo : removeButtonDelete}>
       {/* Рендер превью или иконки */}
       {renderFileIcon()}
       <p className={filename}>{file.fileName}</p>
-      <button onClick={handleRemoveFile} className={removeButton}>
+      <button
+        onClick={() => handleRemoveFile(file.id)}
+        className={removeButton}
+        disabled={isDelete}
+      >
         <HighlightOffIcon style={{ color: 'red' }} />
       </button>
     </li>

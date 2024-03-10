@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import styles from './FileUploadPreview.module.less';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { FileRejection } from 'react-dropzone';
 import { getFileIcon } from '../../utils/utils';
 

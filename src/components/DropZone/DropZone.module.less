@@ -1,87 +1,44 @@
 @import '../../index.less';
 
 .dndZone {
-    display        : flex;
-    gap            : 10px;
-    flex-direction : column;
-    justify-content: center;
-    align-items    : center;
-    padding        : 20px;
-    border-radius  : 10px;
-    border         : 2px dashed #555;
-    color          : #555;
-    cursor         : pointer;
-    transition     : background .2s ease-in-out, border .2s ease-in-out;
-    width: 400px;
-    min-height: 65px;
-    text-align: center;
+  .flexLayout(center, center, column);
+  .widthHeightBlock(400px, 65px);
+  gap             : 10px;
+  background-color: @dropZone-bgColor;
+  padding         : 20px;
+  border-radius   : 10px;
+  border          : 2px dashed @dropZone-borderColor;
+  color           : @dropZone-textColor;
+  cursor          : pointer;
+  transition      : background-color .6s ease-in-out, border .2s ease-in-out;
+  text-align      : center;
+
+  &:hover {
+    background-color: @dropZone-hoverBgColor;
+    border-color    : @dropZone-hoverBorderColor;
+    color           : @dropZone-hoverTextColor;
+  }
+
+  & .drop-title {
+    color: @dropZone-bgColor;
+  }
 }
 
-.dndZoneText{
-    .fontMixin()
-}
-
-.dndZone:hover {
-    background  : #eee;
-    border-color: #111;
-}
-
-.dndZone:hover .drop-title {
-    color: #222;
-}
-
-.thumbsContainer {
-    display       : flex;
-    flex-direction: row;
-    flex-wrap     : wrap;
-    margin-top    : 16px;
-}
-
-.thumb {
-    display      : inline-flex;
-    border-radius: 2px;
-    margin-bottom: 8px;
-    margin-right : 8px;
-    width        : 100px;
-    height       : 100px;
-    padding      : 4px;
-    box-sizing   : border-box;
-}
-
-.thumbInner {
-    display  : flex;
-    min-width: 0;
-    overflow : hidden;
-}
-
-.img {
-    display      : block;
-    width        : auto;
-    height       : 100%;
-    border-radius: 50%;
-}
-
-.progressBarInner {
-    height          : 100%;
-    background-color: #801ab3;
-    width           : 0%; // Начальная ширина
+.dndZoneText {
+  .fontMixin()
 }
 
 .progressBar {
-    position        : absolute;
-    top             : 0;
-    left            : 0;
-    width           : 100%;
-    background-color: #eee;
-    border-radius   : 4px;
-    overflow        : hidden;
+  .absolutPosition();
+  width           : 100%;
+  background-color: @dropZone-progressBgColor;
+  border-radius   : 4px;
+  overflow        : hidden;
 }
 
 .progressFiller {
-    height          : 4px;
-    background-color: #801ab3;
-    width           : 0%;
-    /* Начальное значение ширины */
-    transition      : width 0.1s ease-in-out;
-    /* Плавное изменение ширины */
+  height          : 4px;
+  background-color: @dropZone-progressFillerBgColor;
+  width           : 0%;
+  transition      : width 0.1s ease-in-out;
 }

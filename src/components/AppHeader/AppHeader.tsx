@@ -1,10 +1,6 @@
 import { FC } from 'react';
 import styles from './AppHeader.module.less';
-import {
-  Button,
-  Input,
-  PasswordInput,
-} from '@ya.praktikum/react-developer-burger-ui-components';
+import { Button } from '@ya.praktikum/react-developer-burger-ui-components';
 import { useAppDispatch, useAppSelector } from '../../services/hooks/hooks';
 import { signOut } from '../../services/reducers/authorization.slice';
 import { getCookie } from '../../auth/auth';
@@ -15,51 +11,57 @@ import { uploadFiles } from '../../services/reducers/attachments.slice';
 const AppHeader: FC = () => {
   const dispatch = useAppDispatch();
   const token = getCookie('token');
+  const { header, logo } = styles;
 
-  const { user, isLoading, acceptedFiles, rejectedFiles } = useAppSelector(
-    (state) => ({
-      user: state.auth.user, // Обновили путь к состоянию
+  const { isLoading, acceptedFiles, rejectedFiles, isLoadingAttachments } =
+    useAppSelector((state) => ({
       isLoading: state.auth.isLoading,
-      acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
+      acceptedFiles: state.previewFiles.acceptedFiles,
       rejectedFiles: state.previewFiles.rejectedFiles,
-    })
-  );
+      isLoadingAttachments: state.attachments.isLoadingAttachments,
+    }));
 
-  const onButtonClick = () => {
+  //-- Функция для выхода пользователя из прилоджения --//
+  const logoutButtonClick = () => {
     if (token) {
       dispatch(signOut());
     }
   };
 
   //-- Функция для удаления всех выбранных файлов --//
-  const removeButtonClick = () => {
+  const removePreviewFilesButtonClick = () => {
     dispatch(removePreviewFiles());
   };
 
-  const handlerSubmitButton = () => {
-    dispatch(uploadFiles(acceptedFiles))
+  //-- Функция для загрузки файлов --//
+  const uploadFilesButtonClick = () => {
+    dispatch(uploadFiles(acceptedFiles));
   };
 
   return (
-    <header className={styles.header}>
-      <div className={styles.logo}></div>
-
+    <header className={header}>
+      <div className={logo}></div>
+      {/* Компонент для дропа файлов в загрузку */}
       <DropZone />
+      {/* Компоненты кнопок для удаления превью файлов, загрузки файлов и выхода из приложения */}
       <Button
         type="primary"
         size="small"
-        disabled={!acceptedFiles.length && !rejectedFiles.length}
-        onClick={removeButtonClick}
+        disabled={
+          (!acceptedFiles.length && !rejectedFiles.length) ||
+          isLoadingAttachments
+        }
+        onClick={removePreviewFilesButtonClick}
         htmlType="button"
       >
-        Удалить все превью файлов
+        Удалить превью файлов
       </Button>
 
       <Button
         type="primary"
         size="small"
-        disabled={isLoading || !acceptedFiles.length}
-        onClick={handlerSubmitButton}
+        disabled={isLoading || !acceptedFiles.length || isLoadingAttachments}
+        onClick={uploadFilesButtonClick}
         htmlType="button"
       >
         {isLoading ? 'Подождите' : 'Загрузить файлы на сервер'}
@@ -68,8 +70,8 @@ const AppHeader: FC = () => {
       <Button
         type="primary"
         size="small"
-        disabled={isLoading}
-        onClick={onButtonClick}
+        disabled={isLoading || isLoadingAttachments}
+        onClick={logoutButtonClick}
         htmlType="button"
       >
         {isLoading ? 'Подождите' : 'Выйти'}

@@ -1,13 +1,7 @@
-@keyframes manifestation {
-    0% {
-      opacity: 0;
-    }
-  
-    100% {
-      opacity: 1;
-    }
-  }
+@import '../../index.less';
 
-  .app{
-    animation       : manifestation 0.7s ease-in-out;
-  }
+.app {
+  .manifestationAnimation();
+  .widthHeightBlock(100vw, 100vh);
+  background-color: @app-bgColor;
+}

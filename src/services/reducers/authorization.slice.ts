@@ -26,7 +26,7 @@ const initialState: TAuthorizationState = {
   error: null,
 };
 
-// Асинхронные thunk-действия
+//-- Асинхронное thunk-действие входа в приложение --//
 export const signIn = createAsyncThunk(
   '/api/login',
   async (userData: TUserSigninData, { rejectWithValue }) => {
@@ -42,6 +42,7 @@ export const signIn = createAsyncThunk(
   }
 );
 
+//-- Асинхронное thunk-действие выхода из приложения --//
 export const signOut = createAsyncThunk(
   '/api/logout',
   async (_, { rejectWithValue }) => {
@@ -57,6 +58,7 @@ export const signOut = createAsyncThunk(
   }
 );
 
+//-- Асинхронное thunk-действие регистраии в приложении --//
 export const signUp = createAsyncThunk(
   '/api/register',
   async (userData: TUserSignupData, { rejectWithValue }) => {
@@ -77,7 +79,7 @@ const authorizationSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      //-- Обработка состояний register --//
+      //-- Обработка состояний во время регистрации --//
       .addCase(signUp.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -91,7 +93,8 @@ const authorizationSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      //-- Обработка состояний login --//
+
+      //-- Обработка состояний во время входа в приложение --//
       .addCase(signIn.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -105,7 +108,8 @@ const authorizationSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      //-- Обработка состояний logout --//
+
+      //-- Обработка состояний выхода из приложения --//
       .addCase(signOut.pending, (state) => {
         state.isLoading = true;
       })

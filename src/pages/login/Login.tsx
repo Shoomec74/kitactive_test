@@ -1,4 +1,4 @@
-import loginStyles from './login.module.css';
+import loginStyles from './login.module.less';
 import {
   Button,
   Input,
@@ -13,15 +13,22 @@ import { signIn } from '../../services/reducers/authorization.slice';
 
 export const Login: FC = () => {
   const { loginPage, form, link } = loginStyles;
+
   const dispatch = useAppDispatch();
+
   const cookie = getCookie('token');
+
   const location = useLocation();
+
   const { isLoading, isLogin } = useAppSelector((state) => ({
     isLoading: state.auth.isLoading, // Обновили путь к состоянию
     isLogin: state.auth.isLogin,
   }));
+
   const initialValuesForm = { email: '', password: '' };
+
   const { values, handleChange, setValues } = useForm(initialValuesForm);
+
   const { email, password } = values;
 
   const handlerSubmit = (e: FormEvent<HTMLFormElement>): void => {

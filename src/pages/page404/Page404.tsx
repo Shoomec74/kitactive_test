@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import page404Styles from "./page404.module.css";
+import page404Styles from "./page404.module.less";
 
 export const Page404: FC = () => {
   const { page404, neonText } = page404Styles;

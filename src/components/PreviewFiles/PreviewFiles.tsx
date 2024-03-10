@@ -9,15 +9,18 @@ import { loadFiles } from '../../services/reducers/attachments.slice';
 import { removePreviewFiles } from '../../services/reducers/previewFiles.slice';
 
 const PreviewFiles: FC = () => {
+  //-- Ссылки на стили для элементов предварительного просмотра --//
+  const { content, sectionBox, titleWrapper, sectionWrapper, sectionTitle } =
+    styles;
+
   //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
-  const { acceptedFiles, rejectedFiles, files, isUpload} = useAppSelector(
-    (state) => ({
+  const { acceptedFiles, rejectedFiles, serverFiles, isUpload } =
+    useAppSelector((state) => ({
       acceptedFiles: state.previewFiles.acceptedFiles,
       rejectedFiles: state.previewFiles.rejectedFiles,
-      files: state.attachments.files,
+      serverFiles: state.attachments.serverFiles,
       isUpload: state.attachments.isUpload,
-    })
-  );
+    }));
 
   const dispatch = useAppDispatch();
 
@@ -25,9 +28,6 @@ const PreviewFiles: FC = () => {
     dispatch(loadFiles());
     dispatch(removePreviewFiles());
   }, [isUpload]);
-
-  //-- Ссылки на стили для элементов предварительного просмотра --//
-  const { content, allowFiles, titleWrapper, sectionWrapper, sectionTitle } = styles;
 
   const previewsFiles = [...acceptedFiles, ...rejectedFiles];
 
@@ -38,17 +38,19 @@ const PreviewFiles: FC = () => {
         <h2 className={sectionTitle}>Файлы на сервере</h2>
       </div>
       <div className={sectionWrapper}>
-        <section className={allowFiles}>
+        <section className={sectionBox}>
           <ul>
-            {previewsFiles.map((item: File | FileRejection) => {
-              //@ts-ignore
-              return <FileUploadPreview file={item} key={item.name} />;
+            {previewsFiles.map((item: File | FileRejection, index) => {
+              return (
+                //@ts-ignore
+                <FileUploadPreview file={item} key={`${item.name}${index}`} />
+              );
             })}
           </ul>
         </section>
-        <section className={allowFiles}>
-          {files.map((item: TResponseLoadFile) => {
-            return <ServerFilesList file={item} key={item.name} />;
+        <section className={sectionBox}>
+          {serverFiles.map((item: TResponseLoadFile) => {
+            return <ServerFilesList file={item} key={item.id} />;
           })}
         </section>
       </div>

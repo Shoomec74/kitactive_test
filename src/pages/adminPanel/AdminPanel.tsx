@@ -8,7 +8,9 @@ import { getCookie } from '../../auth/auth';
 
 const AdminPanel: FC = () => {
   const navigate = useNavigate();
+
   const location = useLocation();
+
   const cookie = getCookie('token');
 
   const { isLogin } = useAppSelector((state) => ({

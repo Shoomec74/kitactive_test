@@ -7,8 +7,8 @@ import {
   setPreviewRejectedFiles,
 } from '../../services/reducers/previewFiles.slice';
 
-const MAX_SIZE = 1024 * 1024; // Максимальный размер файлов в байтах (1MB)
-const MAX_FILES = 20; // Максимальное количество файлов
+const MAX_SIZE = 1024 * 1024;
+const MAX_FILES = 19;
 
 const DropZone: FC = () => {
   //-- Ссылки на стили для элементов предварительного просмотра --//
@@ -16,24 +16,39 @@ const DropZone: FC = () => {
 
   //-- Если когда-то понадобится сохранять большие файлы то можно отображать процесс загрузкт сначала в память браузера --//
   const [filesProcessed, setFilesProcessed] = useState(0);
+
+  //-- Состояние для визуализации прогрессбара --//
   const [totalFiles, setTotalFiles] = useState(0);
+
+  //-- Состояние для отслеживания общего размера вложений --//
+  const [totalSize, setTotalSize] = useState(0);
 
   const dispatch = useAppDispatch();
 
   //-- Инициализация состояний для хранения информации о прогрессе загрузки, статусе загрузки, принятых и отклоненных файлах --//
-  const { acceptedFiles, files } = useAppSelector((state) => ({
-    acceptedFiles: state.previewFiles.acceptedFiles, // Обновили путь к состоянию
-    rejectedFiles: state.previewFiles.rejectedFiles,
-    files: state.attachments.files,
+  const { acceptedFiles, serverFiles, previewFilesIsClear } = useAppSelector((state) => ({
+    acceptedFiles: state.previewFiles.acceptedFiles,
+    serverFiles: state.attachments.serverFiles,
+    previewFilesIsClear: state.previewFiles.previewFilesIsClear,
   }));
 
+  //-- После загрузки файлов на сервер обновляем лимит по размеру вложений и обновляем счетчик загруженных файлов на странице --//
   const totalLoadedFiles = useMemo(() => {
-    return files.length;
-  }, [files]);
+    setTotalSize(0);
+    return serverFiles.length;
+  }, [serverFiles]);
 
+  //-- После очистки превью файлов обновляем лимит по размеру вложений --//
+  const clearTotalSize = useMemo(() => {
+    if(previewFilesIsClear){
+      setTotalSize(0);
+    }
+  }, [previewFilesIsClear]);
+
+  //-- Обновляем допустимое кол-во разрешенных файлов к загрузке --//
   const allowLoadedFiles = useMemo(() => {
-    return MAX_FILES - (files.length + acceptedFiles.length);
-  }, [files, acceptedFiles]);
+    return MAX_FILES - (serverFiles.length + acceptedFiles.length);
+  }, [serverFiles, acceptedFiles]);
 
   //-- Функция fileSize валидирует размер файла, возвращая ошибку, если файл превышает 1МБ --//
   const fileSize = (file: File) => {
@@ -49,32 +64,28 @@ const DropZone: FC = () => {
 
   //-- Функция onDrop обрабатывает событие перетаскивания файлов в зону загрузки, обновляя состояния принятых и отклоненных файлов --//
   const onDrop = useCallback(
-    async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      let totalLoadedSize = 0;
-      setTotalFiles(acceptedFiles.length);
+    async (
+      onDropAcceptedFiles: File[],
+      onDropRejectedFiles: FileRejection[],
+    ) => {
+      let totalAccepted = MAX_FILES - serverFiles.length - acceptedFiles.length;
+      let totalLoadedSize = totalSize;
+      setTotalFiles(onDropAcceptedFiles.length);
 
       const newRejected = [];
 
-      for (const file of acceptedFiles) {
+      for (const file of onDropAcceptedFiles) {
+        //-- Имитация зарузки для визуализации процесса добавления файлов--//
         await new Promise((resolve) => setTimeout(resolve, 100)); // Имитация задержки
 
-        const fileData = {
-          preview: URL.createObjectURL(file),
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          lastModified: file.lastModified,
-        };
-
-        if (
-          totalLoadedFiles <= MAX_FILES &&
-          totalLoadedSize + file.size <= MAX_SIZE
-        ) {
+        if (totalAccepted > 0 && totalLoadedSize + file.size <= MAX_SIZE) {
           // @ts-ignore
           file.preview = URL.createObjectURL(file);
           // Если не превышены лимиты по количеству и размеру, принимаем файл
           dispatch(setPreviewAcceptedFiles(file));
           totalLoadedSize += file.size;
+          totalAccepted--;
+          setTotalSize(totalLoadedSize);
         } else {
           // Иначе, файл попадает в массив отклонённых
           const message = `Превышен лимит в ${MAX_FILES} файлов или общий размер файлов превышает 1mb`;
@@ -87,17 +98,20 @@ const DropZone: FC = () => {
         setFilesProcessed((prevCount) => prevCount + 1);
       }
 
-      dispatch(setPreviewRejectedFiles([...rejectedFiles, ...newRejected]));
+      dispatch(
+        setPreviewRejectedFiles([...onDropRejectedFiles, ...newRejected]),
+      );
       setFilesProcessed(0);
       setTotalFiles(0);
     },
-    []
+    [serverFiles, acceptedFiles, totalSize],
   );
 
   //-- Использование useDropzone для интеграции функционала drag-n-drop с кастомной логикой валидации и обработки файлов --//
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     validator: fileSize,
+    disabled: filesProcessed > 0,
   });
 
   return (
